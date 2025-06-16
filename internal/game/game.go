@@ -53,10 +53,34 @@ func MakeGrid() {
 	line4.Position1 = fyne.NewPos(0, 400)
 	line4.Position2 = fyne.NewPos(600, 400)
 
+	line5 := canvas.NewLine(color.White)
+	line5.StrokeWidth = 5
+	line5.Position1 = fyne.NewPos(0, -3)
+	line5.Position2 = fyne.NewPos(0, 603)
+
+	line6 := canvas.NewLine(color.White)
+	line6.StrokeWidth = 5
+	line6.Position1 = fyne.NewPos(-3, 0)
+	line6.Position2 = fyne.NewPos(603, 0)
+
+	line7 := canvas.NewLine(color.White)
+	line7.StrokeWidth = 5
+	line7.Position1 = fyne.NewPos(600, 0)
+	line7.Position2 = fyne.NewPos(600, 603)
+
+	line8 := canvas.NewLine(color.White)
+	line8.StrokeWidth = 5
+	line8.Position1 = fyne.NewPos(0, 600)
+	line8.Position2 = fyne.NewPos(603, 600)
+
 	Field.Add(line1)
 	Field.Add(line2)
 	Field.Add(line3)
 	Field.Add(line4)
+	Field.Add(line5)
+	Field.Add(line6)
+	Field.Add(line7)
+	Field.Add(line8)
 
 }
 
@@ -79,17 +103,18 @@ func DrawCircle(x, y float32) {
 
 func DrawX(x, y float32) {
 	line1 := canvas.NewLine(color.NRGBA{R: 255, G: 0, B: 0, A: 255})
-	line1.StrokeWidth = 10
-	line1.Position1 = fyne.NewPos(x+7.06, y+7.06)
-	line1.Position2 = fyne.NewPos(x+192.94, y+192.94)
+	line1.StrokeWidth = 5
+	line1.Position1 = fyne.NewPos(x, y)
+	line1.Position2 = fyne.NewPos(x+200, y+200)
 
 	line2 := canvas.NewLine(color.NRGBA{R: 255, G: 0, B: 0, A: 255})
-	line2.StrokeWidth = 10
-	line2.Position1 = fyne.NewPos(x+192.94, y+7.06)
-	line2.Position2 = fyne.NewPos(x+7.06, y+192.94)
+	line2.StrokeWidth = 5
+	line2.Position1 = fyne.NewPos(x+200, y)
+	line2.Position2 = fyne.NewPos(x, y+200)
 
 	Field.Add(line1)
 	Field.Add(line2)
+	MakeGrid()
 	Field.Refresh()
 
 }
@@ -100,8 +125,8 @@ func AddButton(x, y float32) {
 			MakeMove(x, y)
 		}
 	})
-	button.Resize(fyne.NewSize(195, 195))
-	button.Move(fyne.NewPos(x+2.5, y+2.5))
+	button.Resize(fyne.NewSize(200, 200))
+	button.Move(fyne.NewPos(x, y))
 
 	Field.Add(button)
 }
@@ -188,8 +213,8 @@ func CheckDraw() bool {
 }
 
 func StartNewGame() {
-	MakeGrid()
 	AddButttons()
+	MakeGrid()
 	g = NewGame()
 }
 

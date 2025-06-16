@@ -64,18 +64,18 @@ func MakeGrid() {
 
 	line6 := canvas.NewLine(color.White)
 	line6.StrokeWidth = 5
-	line6.Position1 = fyne.NewPos(-3, 0)
+	line6.Position1 = fyne.NewPos(0, 0)
 	line6.Position2 = fyne.NewPos(603, 0)
 
 	line7 := canvas.NewLine(color.White)
 	line7.StrokeWidth = 5
-	line7.Position1 = fyne.NewPos(595, 0)
-	line7.Position2 = fyne.NewPos(595, 603)
+	line7.Position1 = fyne.NewPos(600, 0)
+	line7.Position2 = fyne.NewPos(600, 603)
 
 	line8 := canvas.NewLine(color.White)
 	line8.StrokeWidth = 5
-	line8.Position1 = fyne.NewPos(0, 595)
-	line8.Position2 = fyne.NewPos(603, 595)
+	line8.Position1 = fyne.NewPos(0, 600)
+	line8.Position2 = fyne.NewPos(603, 600)
 
 	Field.Add(line1)
 	Field.Add(line2)
@@ -172,19 +172,42 @@ func MakeMove(x, y float32) {
 }
 
 func OfferNewGame(winner string) {
-	button := widget.NewButton("winner is "+winner+"\n\n\nNew game", func() {
-		Field.RemoveAll()
-		StartNewGame()
-	})
-	exitButton := widget.NewButton("exit game", func() { ShowMenu() })
-	exitButton.Resize(fyne.NewSize(200, 100))
-	exitButton.Move(fyne.NewPos(0, 100))
 
-	button.Resize(fyne.NewSize(200, 100))
-	button.Move(fyne.NewPos(0, 0))
-	buttons := container.NewWithoutLayout(button, exitButton)
+	TextNewGame := container.NewCenter(
+		widget.NewLabel("winner is " + winner + "\n\n\nNew game"),
+	)
+
+	btn := container.New(
+		layout.NewMaxLayout(),
+		widget.NewButton("", func() {
+			Field.RemoveAll()
+			StartNewGame()
+		}),
+		canvas.NewRectangle(color.RGBA{R: 0, G: 127, B: 0, A: 255}),
+		TextNewGame,
+	)
+
+	TextExit := container.NewCenter(
+		widget.NewLabel("Exit game"),
+	)
+	btnExit := container.New(
+		layout.NewMaxLayout(),
+		widget.NewButton("", func() { App.Quit() }),
+		canvas.NewRectangle(color.RGBA{R: 127, G: 0, B: 0, A: 255}),
+		TextExit,
+	)
+
+	btn.Resize(fyne.NewSize(200, 100))
+	btn.Move(fyne.NewPos(0, 0))
+
+	btnExit.Resize(fyne.NewSize(200, 100))
+	btnExit.Move(fyne.NewPos(0, 100))
+
+	buttons := container.NewWithoutLayout(btn, btnExit)
 	buttons.Move(fyne.NewPos(200, 200))
+
 	Field.Add(buttons)
+	MakeGrid()
 }
 
 func CheckWin() bool {
@@ -229,7 +252,7 @@ func StartNewGame() {
 
 func StartGame() {
 
-	window.Resize(fyne.NewSize(600, 600))
+	window.Resize(fyne.NewSize(608, 608))
 	StartNewGame()
 
 	content := container.NewWithoutLayout(&Field)
@@ -238,7 +261,7 @@ func StartGame() {
 
 func ShowMenu() {
 
-	window.Resize(fyne.NewSize(600, 600))
+	window.Resize(fyne.NewSize(608, 608))
 
 	NewGameButton := widget.NewButton("New Game", func() {
 		StartGame()

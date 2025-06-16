@@ -1,6 +1,7 @@
 package game
 
 import (
+	"Xs0s/internal/user"
 	"Xs0s/utils/customButton"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -12,8 +13,11 @@ import (
 
 var Field = *container.NewWithoutLayout()
 var Menu = *container.NewWithoutLayout()
+var Logger = *container.NewWithoutLayout()
 var App = app.New()
 var window = App.NewWindow("Hello World")
+
+var Player user.User
 
 type Game struct {
 	current string
@@ -239,19 +243,38 @@ func ShowMenu() {
 	NewGameButton := widget.NewButton("New Game", func() {
 		StartGame()
 	})
-
 	NewGameButton.Resize(fyne.NewSize(400, 200))
 	NewGameButton.Move(fyne.NewPos(100, 100))
 
 	ExitButton := widget.NewButton("Exit", func() { App.Quit() })
 	ExitButton.Resize(fyne.NewSize(200, 100))
 	ExitButton.Move(fyne.NewPos(200, 300))
-	content := container.NewWithoutLayout(NewGameButton, ExitButton)
-	window.SetContent(content)
+
+	LogInButton := widget.NewButton("Log In", func() { LogIn() })
+	LogInButton.Resize(fyne.NewSize(100, 100))
+	LogInButton.Move(fyne.NewPos(0, 0))
+
+	Menu.Add(NewGameButton)
+	Menu.Add(ExitButton)
+	Menu.Add(LogInButton)
+
+	window.SetContent(&Menu)
 }
 
 func RunApp() {
 	ShowMenu()
 	window.SetFixedSize(true)
+
 	window.ShowAndRun()
+}
+
+func LogIn() {
+	input := widget.NewEntry()
+	input.SetPlaceHolder("Enter your username")
+	input.Resize(fyne.NewSize(400, 200))
+
+	Logger.Add(input)
+	window.SetContent(&Logger)
+	richtext := input.Text
+	Player = *user.NewUser(richtext)
 }

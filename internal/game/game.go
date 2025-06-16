@@ -65,13 +65,13 @@ func MakeGrid() {
 
 	line7 := canvas.NewLine(color.White)
 	line7.StrokeWidth = 5
-	line7.Position1 = fyne.NewPos(600, 0)
-	line7.Position2 = fyne.NewPos(600, 603)
+	line7.Position1 = fyne.NewPos(595, 0)
+	line7.Position2 = fyne.NewPos(595, 603)
 
 	line8 := canvas.NewLine(color.White)
 	line8.StrokeWidth = 5
-	line8.Position1 = fyne.NewPos(0, 600)
-	line8.Position2 = fyne.NewPos(603, 600)
+	line8.Position1 = fyne.NewPos(0, 595)
+	line8.Position2 = fyne.NewPos(603, 595)
 
 	Field.Add(line1)
 	Field.Add(line2)
@@ -160,6 +160,9 @@ func MakeMove(x, y float32) {
 	if CheckWin() {
 		OfferNewGame(g.field[i][j])
 	}
+	if CheckDraw() {
+		OfferNewGame("nobody")
+	}
 }
 
 func OfferNewGame(winner string) {
@@ -224,7 +227,6 @@ func StartGame() {
 	StartNewGame()
 
 	content := container.NewWithoutLayout(&Field)
-
 	window.SetContent(content)
 }
 
@@ -248,5 +250,6 @@ func ShowMenu() {
 
 func RunApp() {
 	ShowMenu()
+	window.SetFixedSize(true)
 	window.ShowAndRun()
 }

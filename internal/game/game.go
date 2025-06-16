@@ -142,27 +142,29 @@ func AddButttons() {
 func MakeMove(x, y float32) {
 	i := int(x / 200)
 	j := int(y / 200)
+
+	switch g.current {
+	case "X":
+		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
+			DrawX(x, y)
+			g.current = "0"
+			g.field[i][j] = "X"
+		}
+	case "0":
+		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
+			DrawCircle(x, y)
+			g.current = "X"
+			g.field[i][j] = "O"
+		}
+
+	}
+
 	if CheckWin() {
 		OfferNewGame(g.field[i][j])
 	}
 	if CheckDraw() {
 		OfferNewGame("nobody")
 	}
-	switch g.current {
-	case "X":
-		if g.field[i][j] == "" {
-			DrawX(x, y)
-			g.current = "0"
-			g.field[i][j] = "X"
-		}
-	case "0":
-		if g.field[i][j] == "" {
-			DrawCircle(x, y)
-			g.current = "X"
-			g.field[i][j] = "O"
-		}
-	}
-
 }
 
 func OfferNewGame(winner string) {
@@ -207,7 +209,7 @@ func CheckWin() bool {
 func CheckDraw() bool {
 	for row := 0; row < 3; row++ {
 		for col := 0; col < 3; col++ {
-			if g.field[row][col] == "" {
+			if g.field[row][col] == "" || CheckWin() {
 				return false
 			}
 		}

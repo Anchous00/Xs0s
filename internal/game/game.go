@@ -3,6 +3,7 @@ package game
 import (
 	"Xs0s/utils/customButton"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -181,4 +182,18 @@ func StartNewGame() {
 	MakeGrid()
 	AddButttons()
 	g = NewGame()
+}
+
+func StartGame() {
+	app := app.New()
+	window := app.NewWindow("Hello World")
+	defer window.Close()
+	window.Resize(fyne.NewSize(600, 600))
+	StartNewGame()
+
+	content := container.NewWithoutLayout(&Field)
+
+	window.SetContent(content)
+	window.ShowAndRun()
+
 }

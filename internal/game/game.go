@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 )
@@ -192,7 +193,7 @@ func OfferNewGame(winner string) {
 	)
 	btnExit := container.New(
 		layout.NewMaxLayout(),
-		widget.NewButton("", func() { App.Quit() }),
+		widget.NewButton("", func() { ShowMenu() }),
 		canvas.NewRectangle(color.RGBA{R: 127, G: 0, B: 0, A: 255}),
 		TextExit,
 	)
@@ -270,7 +271,7 @@ func ShowMenu() {
 	NewGameButton.Move(fyne.NewPos(100, 100))
 
 	ExitButton := widget.NewButton("Exit", func() { App.Quit() })
-	ExitButton.Resize(fyne.NewSize(200, 100))
+	ExitButton.Resize(fyne.NewSize(200, 50))
 	ExitButton.Move(fyne.NewPos(200, 300))
 
 	LogInButton := widget.NewButton("Log In", func() { LogIn() })
@@ -294,10 +295,16 @@ func RunApp() {
 func LogIn() {
 	input := widget.NewEntry()
 	input.SetPlaceHolder("Enter your username")
-	input.Resize(fyne.NewSize(400, 200))
+	input.Resize(fyne.NewSize(350, 40))
+	input.Move(fyne.NewPos(100, 200))
 
+	ExitButton := widget.NewButton("Exit", func() { ShowMenu() })
+	ExitButton.Resize(fyne.NewSize(200, 50))
+	ExitButton.Move(fyne.NewPos(200, 300))
+
+	Logger.Add(ExitButton)
 	Logger.Add(input)
 	window.SetContent(&Logger)
-	richtext := input.Text
-	Player = *user.NewUser(richtext)
+
+	Player = *user.NewUser(input.Text)
 }

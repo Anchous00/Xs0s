@@ -16,7 +16,7 @@ var Field = *container.NewWithoutLayout()
 var Menu = *container.NewWithoutLayout()
 var Logger = *container.NewWithoutLayout()
 var App = app.New()
-var window = App.NewWindow("Hello World")
+var window = App.NewWindow("Конченная игра")
 
 var Player user.User
 

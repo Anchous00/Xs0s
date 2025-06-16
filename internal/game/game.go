@@ -111,24 +111,25 @@ func AddButttons() {
 }
 
 func MakeMove(x, y float32) {
-	i := x / 200
-	j := y / 200
+	i := int(x / 200)
+	j := int(y / 200)
 
 	switch g.current {
 	case "X":
-		DrawX(x, y)
-		g.current = "0"
-		g.field[int(i)][int(j)] = "X"
+		if g.field[i][j] == "" {
+			DrawX(x, y)
+			g.current = "0"
+			g.field[i][j] = "X"
+		}
 	case "0":
-		DrawCircle(x, y)
-		g.current = "X"
-		g.field[int(i)][int(j)] = "O"
+		if g.field[i][j] == "" {
+			DrawCircle(x, y)
+			g.current = "X"
+			g.field[i][j] = "O"
+		}
 	}
 	if CheckWin() {
-		OfferNewGame(g.field[int(i)][int(j)])
-	}
-	if CheckDraw() {
-		OfferNewGame("nobody")
+		OfferNewGame(g.field[i][j])
 	}
 }
 

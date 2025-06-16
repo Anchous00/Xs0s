@@ -11,6 +11,8 @@ import (
 )
 
 var Field fyne.Container = *container.NewWithoutLayout()
+var isGameRunning bool
+var App fyne.App = app.New()
 
 type Game struct {
 	current string
@@ -139,9 +141,15 @@ func OfferNewGame(winner string) {
 		Field.RemoveAll()
 		StartNewGame()
 	})
-	button.Resize(fyne.NewSize(400, 300))
-	button.Move(fyne.NewPos(100, 150))
-	Field.Add(button)
+	exitButton := widget.NewButton("exit game", func() { App.Quit() })
+	exitButton.Resize(fyne.NewSize(200, 100))
+	exitButton.Move(fyne.NewPos(0, 100))
+
+	button.Resize(fyne.NewSize(200, 100))
+	button.Move(fyne.NewPos(0, 0))
+	buttons := container.NewWithoutLayout(button, exitButton)
+	buttons.Move(fyne.NewPos(200, 200))
+	Field.Add(buttons)
 }
 
 func CheckWin() bool {
@@ -185,8 +193,9 @@ func StartNewGame() {
 }
 
 func StartGame() {
-	app := app.New()
-	window := app.NewWindow("Hello World")
+	isGameRunning = true
+
+	window := App.NewWindow("Hello World")
 	defer window.Close()
 	window.Resize(fyne.NewSize(600, 600))
 	StartNewGame()

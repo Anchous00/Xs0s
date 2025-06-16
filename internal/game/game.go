@@ -10,9 +10,10 @@ import (
 	"image/color"
 )
 
-var Field fyne.Container = *container.NewWithoutLayout()
-var isGameRunning bool
-var App fyne.App = app.New()
+var Field = *container.NewWithoutLayout()
+var Menu = *container.NewWithoutLayout()
+var App = app.New()
+var window = App.NewWindow("Hello World")
 
 type Game struct {
 	current string
@@ -141,7 +142,7 @@ func OfferNewGame(winner string) {
 		Field.RemoveAll()
 		StartNewGame()
 	})
-	exitButton := widget.NewButton("exit game", func() { App.Quit() })
+	exitButton := widget.NewButton("exit game", func() { ShowMenu() })
 	exitButton.Resize(fyne.NewSize(200, 100))
 	exitButton.Move(fyne.NewPos(0, 100))
 
@@ -193,16 +194,34 @@ func StartNewGame() {
 }
 
 func StartGame() {
-	isGameRunning = true
 
-	window := App.NewWindow("Hello World")
-	defer window.Close()
 	window.Resize(fyne.NewSize(600, 600))
 	StartNewGame()
 
 	content := container.NewWithoutLayout(&Field)
 
 	window.SetContent(content)
-	window.ShowAndRun()
+}
 
+func ShowMenu() {
+
+	window.Resize(fyne.NewSize(600, 600))
+
+	NewGameButton := widget.NewButton("New Game", func() {
+		StartGame()
+	})
+
+	NewGameButton.Resize(fyne.NewSize(400, 200))
+	NewGameButton.Move(fyne.NewPos(100, 100))
+
+	ExitButton := widget.NewButton("Exit", func() { App.Quit() })
+	ExitButton.Resize(fyne.NewSize(200, 100))
+	ExitButton.Move(fyne.NewPos(200, 300))
+	content := container.NewWithoutLayout(NewGameButton, ExitButton)
+	window.SetContent(content)
+}
+
+func RunApp() {
+	ShowMenu()
+	window.ShowAndRun()
 }

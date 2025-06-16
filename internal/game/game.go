@@ -175,7 +175,8 @@ func MakeMove(x, y float32) {
 func OfferNewGame(winner string) {
 
 	TextNewGame := container.NewCenter(
-		widget.NewLabel("winner is " + winner + "\n\n\nNew game"),
+		widget.NewLabel("winner is "+winner),
+		widget.NewLabel("\n\n\nNew game"),
 	)
 
 	btn := container.New(

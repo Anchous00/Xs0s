@@ -267,6 +267,14 @@ func ShowMenu() {
 
 	window.Resize(fyne.NewSize(608, 608))
 
+	OLEG := canvas.NewImageFromFile("internal/user/OLEG.jpg")
+	content := container.NewStack(OLEG)
+	content.Resize(fyne.NewSize(600, 600))
+	content.Move(fyne.NewPos(0, 0))
+	if Player.Username == "Oleg" {
+		Menu.Add(content)
+	}
+
 	NewGameButton := widget.NewButton("New Game", func() {
 		StartGame()
 	})
@@ -286,7 +294,9 @@ func ShowMenu() {
 		labelUsername = widget.NewLabel("Guest")
 	}
 	LabelUsername := container.NewCenter(labelUsername)
+
 	Icon := widget.NewIcon(theme.AccountIcon())
+
 	UserInfo := container.NewHBox(
 		Icon,
 		LabelUsername,
@@ -311,6 +321,9 @@ func RunApp() {
 	ShowMenu()
 	window.SetFixedSize(true)
 
+	ic, _ := fyne.LoadResourceFromPath("internal/user/OLEG.jpg")
+	window.SetIcon(ic)
+
 	window.ShowAndRun()
 }
 
@@ -333,6 +346,7 @@ func LogIn() {
 		if err = user.WriteUsers(User); err != nil {
 			log.Println("Error while writing users file:", err)
 		}
+		ShowMenu()
 	})
 	SaveButton.Resize(fyne.NewSize(200, 50))
 	SaveButton.Move(fyne.NewPos(200, 250))

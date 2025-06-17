@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 	"log"
@@ -280,6 +281,25 @@ func ShowMenu() {
 	LogInButton.Resize(fyne.NewSize(100, 100))
 	LogInButton.Move(fyne.NewPos(0, 0))
 
+	var labelUsername = widget.NewLabel(Player.Username)
+	if Player.Username == "" {
+		labelUsername = widget.NewLabel("Guest")
+	}
+	LabelUsername := container.NewCenter(labelUsername)
+	Icon := widget.NewIcon(theme.AccountIcon())
+	UserInfo := container.NewHBox(
+		Icon,
+		LabelUsername,
+	)
+	User := container.New(
+		layout.NewMaxLayout(),
+		canvas.NewRectangle(color.RGBA{R: 0, G: 0, B: 127, A: 255}),
+		UserInfo,
+	)
+	User.Resize(fyne.NewSize(200, 100))
+	User.Move(fyne.NewPos(400, 0))
+
+	Menu.Add(User)
 	Menu.Add(NewGameButton)
 	Menu.Add(ExitButton)
 	Menu.Add(LogInButton)
@@ -309,6 +329,7 @@ func LogIn() {
 		User := user.User{
 			Username: input.Text,
 		}
+		Player.Username = User.Username
 		if err = user.WriteUsers(User); err != nil {
 			log.Println("Error while writing users file:", err)
 		}

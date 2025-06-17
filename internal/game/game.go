@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"log"
 )
 
 var Field = *container.NewWithoutLayout()
@@ -180,7 +181,7 @@ func OfferNewGame(winner string) {
 	)
 
 	btn := container.New(
-		layout.NewMaxLayout(),
+		layout.NewStackLayout(),
 		widget.NewButton("", func() {
 			Field.RemoveAll()
 			StartNewGame()
@@ -193,7 +194,7 @@ func OfferNewGame(winner string) {
 		widget.NewLabel("Exit game"),
 	)
 	btnExit := container.New(
-		layout.NewMaxLayout(),
+		layout.NewStackLayout(),
 		widget.NewButton("", func() { ShowMenu() }),
 		canvas.NewRectangle(color.RGBA{R: 127, G: 0, B: 0, A: 255}),
 		TextExit,
@@ -294,6 +295,7 @@ func RunApp() {
 }
 
 func LogIn() {
+	var err error
 	input := widget.NewEntry()
 	input.SetPlaceHolder("Enter your username")
 	input.Resize(fyne.NewSize(350, 40))
@@ -303,9 +305,20 @@ func LogIn() {
 	ExitButton.Resize(fyne.NewSize(200, 50))
 	ExitButton.Move(fyne.NewPos(200, 300))
 
+	SaveButton := widget.NewButton("Enter", func() {
+		User := user.User{
+			Username: input.Text,
+		}
+		if err = user.WriteUsers(User); err != nil {
+			log.Println("Error while writing users file:", err)
+		}
+	})
+	SaveButton.Resize(fyne.NewSize(200, 50))
+	SaveButton.Move(fyne.NewPos(200, 250))
+
+	Logger.Add(SaveButton)
 	Logger.Add(ExitButton)
 	Logger.Add(input)
 	window.SetContent(&Logger)
 
-	Player = *user.NewUser(input.Text)
 }

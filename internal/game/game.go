@@ -1,6 +1,7 @@
 package game
 
 import (
+	server "Xs0s/internal/connection"
 	"Xs0s/internal/user"
 	"Xs0s/utils/customButton"
 	"fyne.io/fyne/v2"
@@ -149,19 +150,31 @@ func AddButttons() {
 func MakeMove(x, y float32) {
 	i := int(x / 200)
 	j := int(y / 200)
-
+	if string(Player.Char) != g.current {
+		return
+	}
 	switch g.current {
 	case "X":
 		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
 			DrawX(x, y)
 			g.current = "0"
 			g.field[i][j] = "X"
+			var signal []byte
+			signal = append(signal, byte('X'))
+			signal = append(signal, byte(i))
+			signal = append(signal, byte(j))
+			server.SendMove(signal)
 		}
 	case "0":
 		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
 			DrawCircle(x, y)
 			g.current = "X"
 			g.field[i][j] = "O"
+			var signal []byte
+			signal = append(signal, byte('0'))
+			signal = append(signal, byte(i))
+			signal = append(signal, byte(j))
+			server.SendMove(signal)
 		}
 
 	}
@@ -172,6 +185,7 @@ func MakeMove(x, y float32) {
 	if CheckDraw() {
 		OfferNewGame("nobody")
 	}
+	g.field = server.Gamefield
 }
 
 func OfferNewGame(winner string) {
@@ -276,6 +290,8 @@ func ShowMenu() {
 	}
 
 	NewGameButton := widget.NewButton("New Game", func() {
+		server.ConnectToServer()
+		Player.Char = []byte("0")
 		StartGame()
 	})
 	NewGameButton.Resize(fyne.NewSize(400, 200))
@@ -283,11 +299,19 @@ func ShowMenu() {
 
 	ExitButton := widget.NewButton("Exit", func() { App.Quit() })
 	ExitButton.Resize(fyne.NewSize(200, 50))
-	ExitButton.Move(fyne.NewPos(200, 300))
+	ExitButton.Move(fyne.NewPos(200, 350))
 
 	LogInButton := widget.NewButton("Log In", func() { LogIn() })
 	LogInButton.Resize(fyne.NewSize(100, 100))
 	LogInButton.Move(fyne.NewPos(0, 0))
+
+	StartServerButton := widget.NewButton("Create game", func() {
+		Player.Char = []byte("X")
+		server.StartServer()
+		StartGame()
+	})
+	StartServerButton.Resize(fyne.NewSize(200, 50))
+	StartServerButton.Move(fyne.NewPos(200, 300))
 
 	var labelUsername = widget.NewLabel(Player.Username)
 	if Player.Username == "" {
@@ -311,6 +335,7 @@ func ShowMenu() {
 
 	Menu.Add(User)
 	Menu.Add(NewGameButton)
+	Menu.Add(StartServerButton)
 	Menu.Add(ExitButton)
 	Menu.Add(LogInButton)
 
@@ -320,7 +345,6 @@ func ShowMenu() {
 func RunApp() {
 	ShowMenu()
 	window.SetFixedSize(true)
-
 	ic, _ := fyne.LoadResourceFromPath("internal/user/OLEG.jpg")
 	window.SetIcon(ic)
 

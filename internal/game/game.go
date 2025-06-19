@@ -4,6 +4,7 @@ import (
 	server "Xs0s/internal/connection"
 	"Xs0s/internal/user"
 	"Xs0s/utils/customButton"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -13,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 	"log"
+	"net"
 )
 
 var Field = *container.NewWithoutLayout()
@@ -127,6 +129,19 @@ func DrawX(x, y float32) {
 
 }
 
+func DrawField() {
+	for i := float32(0); i < 3; i++ {
+		for j := float32(0); j < 3; j++ {
+			if g.field[int(i)][int(j)] == "X" {
+				DrawX(i*200, j*200)
+			}
+			if g.field[int(i)][int(i)] == "0" {
+				DrawCircle(i*200, j*200)
+			}
+		}
+	}
+}
+
 func AddButton(x, y float32) {
 	button := customButton.NewCustomTappableRectangle(color.Black, func() {
 		if g.field[int(x/200)][int(y/200)] == "" && !CheckDraw() && !CheckWin() {
@@ -156,7 +171,6 @@ func MakeMove(x, y float32) {
 	switch g.current {
 	case "X":
 		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
-			DrawX(x, y)
 			g.current = "0"
 			g.field[i][j] = "X"
 			var signal []byte
@@ -164,10 +178,10 @@ func MakeMove(x, y float32) {
 			signal = append(signal, byte(i))
 			signal = append(signal, byte(j))
 			server.SendMove(signal)
+			DrawField()
 		}
 	case "0":
 		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
-			DrawCircle(x, y)
 			g.current = "X"
 			g.field[i][j] = "O"
 			var signal []byte
@@ -175,6 +189,7 @@ func MakeMove(x, y float32) {
 			signal = append(signal, byte(i))
 			signal = append(signal, byte(j))
 			server.SendMove(signal)
+			DrawField()
 		}
 
 	}
@@ -185,7 +200,23 @@ func MakeMove(x, y float32) {
 	if CheckDraw() {
 		OfferNewGame("nobody")
 	}
-	g.field = server.Gamefield
+
+	signal := make([]byte, 9)
+
+	conn, err := net.Dial("tcp", "192.168.1.164:4545")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer conn.Close()
+	conn.Read(signal[:])
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			g.field[i][j] = string(signal[i*3+j])
+		}
+	}
+
+	DrawField()
 }
 
 func OfferNewGame(winner string) {
@@ -290,7 +321,6 @@ func ShowMenu() {
 	}
 
 	NewGameButton := widget.NewButton("New Game", func() {
-		server.ConnectToServer()
 		Player.Char = []byte("0")
 		StartGame()
 	})

@@ -5,10 +5,6 @@ import (
 	"Xs0s/internal/user"
 	"Xs0s/utils/customButton"
 	"fmt"
-	"image/color"
-	"log"
-	"time"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -16,6 +12,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"image/color"
+	"log"
 )
 
 var Field = *container.NewWithoutLayout()
@@ -140,7 +138,7 @@ func DrawField() {
 
 func AddButton(x, y float32) {
 	button := customButton.NewCustomTappableRectangle(color.Black, func() {
-		if g.Field[int(x/200)][int(y/200)] == ' ' && !CheckDraw() && !CheckWin() {
+		if g.Field[int(x/200)][int(y/200)] == ' ' && !CheckDraw() && !CheckWin() && Player.Char == g.Current {
 			MakeMove(x, y)
 		}
 	})
@@ -161,20 +159,20 @@ func AddButttons() {
 func MakeMove(x, y float32) {
 	i := int(x / 200)
 	j := int(y / 200)
-	if (Player.Char) != g.Current {
-		return
-	}
 	switch g.Current {
 	case 'X':
 		if g.Field[i][j] == ' ' && !CheckDraw() && !CheckWin() {
 			g.Current = '0'
 			g.Field[i][j] = 'X'
+			DrawField()
+			fmt.Println(g.Field, "first")
 			signal := make([]byte, 0)
 			signal = append(signal, byte('X'))
 			signal = append(signal, byte(i))
 			signal = append(signal, byte(j))
+			fmt.Println(signal, Player.Char, g.Current)
 			server.SendMove(signal)
-			DrawField()
+
 		}
 	case '0':
 		if g.Field[i][j] == ' ' && !CheckDraw() && !CheckWin() {
@@ -187,9 +185,15 @@ func MakeMove(x, y float32) {
 			signal = append(signal, byte(i))
 			signal = append(signal, byte(j))
 			server.SendMove(signal)
+
 		}
 
 	}
+	go func() {
+		g.Field, g.Current = server.WaitMove(g.Field)
+		DrawField()
+		fmt.Println(g.Field, "field")
+	}()
 
 	if CheckWin() {
 		OfferNewGame(g.Field[i][j])
@@ -198,7 +202,6 @@ func MakeMove(x, y float32) {
 		OfferNewGame(' ')
 	}
 
-	DrawField()
 }
 
 func OfferNewGame(winner byte) {
@@ -239,6 +242,8 @@ func OfferNewGame(winner byte) {
 
 	Field.Add(buttons)
 	MakeGrid()
+	DrawField()
+
 }
 
 func CheckWin() bool {
@@ -304,7 +309,6 @@ func ShowMenu() {
 
 	CreateButton := widget.NewButton("Create Game", func() {
 		server.StartServer(g.Field)
-		time.Sleep(10 * time.Millisecond)
 		Player.Char = 'X'
 		StartGame()
 	})
@@ -322,10 +326,11 @@ func ShowMenu() {
 	FindButton := widget.NewButton("Find game", func() {
 		Player.Char = '0'
 		StartGame()
-		time.Sleep(100 * time.Millisecond)
 		server.StartClient(g.Field)
-		g.Field, g.Current = server.WaitMove(g.Field)
-		DrawField()
+		go func() {
+			g.Field, g.Current = server.WaitMove(g.Field)
+			DrawField()
+		}()
 	})
 	FindButton.Resize(fyne.NewSize(200, 50))
 	FindButton.Move(fyne.NewPos(200, 300))

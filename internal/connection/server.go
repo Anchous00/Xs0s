@@ -14,7 +14,7 @@ var ip net.Addr
 var Conn net.Conn
 
 func StartServer(Field [3][3]byte) {
-	
+
 	go func() {
 		listener, err := net.Listen("tcp", ":4545")
 
@@ -33,18 +33,18 @@ func StartServer(Field [3][3]byte) {
 		fmt.Println("New connection from ", Conn.RemoteAddr())
 		ip = Conn.RemoteAddr()
 
-
-		
-
 	}()
 }
 
 func SendMove(code []byte) {
+	fmt.Println("sent code", code)
 	Conn.Write(code)
+
 }
 
 func HandleCode(code []byte, Field [3][3]byte) [3][3]byte {
 	char := code[0]
+	fmt.Println(code)
 	i := code[1]
 	j := code[2]
 	Field[i][j] = char
@@ -53,7 +53,7 @@ func HandleCode(code []byte, Field [3][3]byte) [3][3]byte {
 
 func StartClient(Field [3][3]byte) {
 	var err error
-	Conn, err = net.Dial("tcp", "192.168.78.186:4545")
+	Conn, err = net.Dial("tcp", "127.0.0.1:4545")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -63,14 +63,17 @@ func StartClient(Field [3][3]byte) {
 
 func WaitMove(Field [3][3]byte) ([3][3]byte, byte) {
 	code := make([]byte, 3)
-	Conn.Read(code[:])
-
+	_, err := Conn.Read(code[:])
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("recieved code", code)
 	Field = HandleCode(code, Field)
 	if code[0] == 'X' {
 		code[0] = '0'
 	} else {
 		code[0] = 'X'
 	}
-	
+
 	return Field, code[0]
 }

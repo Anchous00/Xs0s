@@ -189,18 +189,33 @@ func MakeMove(x, y float32) {
 		}
 
 	}
-	go func() {
-		g.Field, g.Current = server.WaitMove(g.Field)
-		DrawField()
-		fmt.Println(g.Field, "field")
-	}()
-
 	if CheckWin() {
 		OfferNewGame(g.Field[i][j])
+		return
 	}
 	if CheckDraw() {
 		OfferNewGame(' ')
+		return
 	}
+	
+
+	go func(){
+
+		g.Field, g.Current = server.WaitMove(g.Field)
+		DrawField()
+
+		if CheckWin() {
+			if Player.Char == '0'{
+				OfferNewGame('X')
+			} else {
+				OfferNewGame('0')
+			}
+		}
+		if CheckDraw() {
+			OfferNewGame(' ')
+		}
+	}()
+}
 
 }
 

@@ -5,72 +5,72 @@ import (
 	"net"
 )
 
-var ip = "192.168.1.164"
-
-var Gamefield [3][3]string
-var current string
-
-func Init() {
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			Gamefield[i][j] = ""
-		}
-	}
-	current = "X"
+type Game struct {
+	Current byte
+	Field   [3][3]byte
 }
 
-func StartServer() {
-	Init()
-	message := make([]byte, 3)
-	message[0] = '0'
-	message[1] = '1'
-	message[2] = '2'
-	listener, err := net.Listen("tcp", ":4545")
+var ip net.Addr
+var Conn net.Conn
 
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer listener.Close()
+func StartServer(Field [3][3]byte) {
+	
+	go func() {
+		listener, err := net.Listen("tcp", ":4545")
 
-	fmt.Println("Server is listening...")
-	for {
-		conn, err := listener.Accept()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		conn.Read(message[:])
-		go HandleSignal(message)
-		for i := 0; i < 3; i++ {
-			for j := 0; j < 3; j++ {
-				conn.Write([]byte(Gamefield[i][j]))
-			}
+
+		fmt.Println("Server is listening...")
+
+		Conn, err = listener.Accept()
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
+		fmt.Println("New connection from ", Conn.RemoteAddr())
+		ip = Conn.RemoteAddr()
 
-		conn.Close()
-	}
-}
 
-func HandleSignal(message []byte) {
-	player := message[0]
-	i := message[1]
-	j := message[2]
-	if current == "X" {
-		current = "0"
-	}
-	if current == "0" {
-		current = "X"
-	}
-	Gamefield[i][j] = string(player)
+		
+
+	}()
 }
 
 func SendMove(code []byte) {
-	conn, err := net.Dial("tcp", ip+":4545")
+	Conn.Write(code)
+}
+
+func HandleCode(code []byte, Field [3][3]byte) [3][3]byte {
+	char := code[0]
+	i := code[1]
+	j := code[2]
+	Field[i][j] = char
+	return Field
+}
+
+func StartClient(Field [3][3]byte) {
+	var err error
+	Conn, err = net.Dial("tcp", "192.168.78.186:4545")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer conn.Close()
-	conn.Write(code)
+
+}
+
+func WaitMove(Field [3][3]byte) ([3][3]byte, byte) {
+	code := make([]byte, 3)
+	Conn.Read(code[:])
+
+	Field = HandleCode(code, Field)
+	if code[0] == 'X' {
+		code[0] = '0'
+	} else {
+		code[0] = 'X'
+	}
+	
+	return Field, code[0]
 }

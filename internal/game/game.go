@@ -205,45 +205,36 @@ func MakeMove(x, y float32) {
 }
 
 func OfferNewGame(winner byte) {
-
-	TextNewGame := container.NewCenter(
+	var Clr uint8
+	var NClr uint8
+	if winner == Player.Char{
+		Clr = 1
+		NClr = 0
+	} else {
+		Clr = 0
+		NClr = 1
+	}
+	Text := container.NewVBox(
 		widget.NewLabel("winner is "+string(winner)),
-		widget.NewLabel("\n\n\nNew game"),
+		widget.NewLabel("Main menu"),
 	)
+	text := container.NewCenter(Text)
 
-	btn := container.New(
-		layout.NewStackLayout(),
-		widget.NewButton("", func() {
-			Field.RemoveAll()
-			StartNewGame()
-		}),
-		canvas.NewRectangle(color.RGBA{R: 0, G: 127, B: 0, A: 255}),
-		TextNewGame,
-	)
-
-	TextExit := container.NewCenter(
-		widget.NewLabel("Exit game"),
-	)
 	btnExit := container.New(
 		layout.NewStackLayout(),
 		widget.NewButton("", func() { ShowMenu() }),
-		canvas.NewRectangle(color.RGBA{R: 127, G: 0, B: 0, A: 255}),
-		TextExit,
+		canvas.NewRectangle(color.RGBA{R: 127*NClr, G: 127*Clr, B: 0, A: 255}),
+		text,
 	)
 
-	btn.Resize(fyne.NewSize(200, 100))
-	btn.Move(fyne.NewPos(0, 0))
+	btnExit.Resize(fyne.NewSize(200, 200))
+	btnExit.Move(fyne.NewPos(0, 0))
 
-	btnExit.Resize(fyne.NewSize(200, 100))
-	btnExit.Move(fyne.NewPos(0, 100))
-
-	buttons := container.NewWithoutLayout(btn, btnExit)
+	buttons := container.NewWithoutLayout(btnExit)
 	buttons.Move(fyne.NewPos(200, 200))
 
 	Field.Add(buttons)
 	MakeGrid()
-	DrawField()
-
 }
 
 func CheckWin() bool {

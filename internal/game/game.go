@@ -169,7 +169,7 @@ func MakeMove(x, y float32) {
 		if g.Field[i][j] == ' ' && !CheckDraw() && !CheckWin() {
 			g.Current = '0'
 			g.Field[i][j] = 'X'
-			signal := make([]byte, 3)
+			signal := make([]byte, 0)
 			signal = append(signal, byte('X'))
 			signal = append(signal, byte(i))
 			signal = append(signal, byte(j))

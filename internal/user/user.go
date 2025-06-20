@@ -10,7 +10,7 @@ const path = "internal/user/usersdb.json"
 
 type User struct {
 	Username string
-	Char     []byte
+	Char byte
 }
 
 func ReadUsers() (users []User, err error) {

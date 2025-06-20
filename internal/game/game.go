@@ -5,6 +5,10 @@ import (
 	"Xs0s/internal/user"
 	"Xs0s/utils/customButton"
 	"fmt"
+	"image/color"
+	"log"
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -12,9 +16,6 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"image/color"
-	"log"
-	"net"
 )
 
 var Field = *container.NewWithoutLayout()
@@ -25,18 +26,13 @@ var window = App.NewWindow("Конченная игра")
 
 var Player user.User
 
-type Game struct {
-	current string
-	field   [3][3]string
-}
-
 var g = NewGame()
 
-func NewGame() *Game {
-	game := &Game{current: "X"}
+func NewGame() *server.Game {
+	game := &server.Game{Current: 'X'}
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			game.field[i][j] = ""
+			game.Field[i][j] = ' '
 		}
 	}
 	return game
@@ -132,10 +128,10 @@ func DrawX(x, y float32) {
 func DrawField() {
 	for i := float32(0); i < 3; i++ {
 		for j := float32(0); j < 3; j++ {
-			if g.field[int(i)][int(j)] == "X" {
+			if g.Field[int(i)][int(j)] == 'X' {
 				DrawX(i*200, j*200)
 			}
-			if g.field[int(i)][int(i)] == "0" {
+			if g.Field[int(i)][int(j)] == '0' {
 				DrawCircle(i*200, j*200)
 			}
 		}
@@ -144,7 +140,7 @@ func DrawField() {
 
 func AddButton(x, y float32) {
 	button := customButton.NewCustomTappableRectangle(color.Black, func() {
-		if g.field[int(x/200)][int(y/200)] == "" && !CheckDraw() && !CheckWin() {
+		if g.Field[int(x/200)][int(y/200)] == ' ' && !CheckDraw() && !CheckWin() {
 			MakeMove(x, y)
 		}
 	})
@@ -165,64 +161,50 @@ func AddButttons() {
 func MakeMove(x, y float32) {
 	i := int(x / 200)
 	j := int(y / 200)
-	if string(Player.Char) != g.current {
+	if (Player.Char) != g.Current {
 		return
 	}
-	switch g.current {
-	case "X":
-		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
-			g.current = "0"
-			g.field[i][j] = "X"
-			var signal []byte
+	switch g.Current {
+	case 'X':
+		if g.Field[i][j] == ' ' && !CheckDraw() && !CheckWin() {
+			g.Current = '0'
+			g.Field[i][j] = 'X'
+			signal := make([]byte, 3)
 			signal = append(signal, byte('X'))
 			signal = append(signal, byte(i))
 			signal = append(signal, byte(j))
 			server.SendMove(signal)
 			DrawField()
 		}
-	case "0":
-		if g.field[i][j] == "" && !CheckDraw() && !CheckWin() {
-			g.current = "X"
-			g.field[i][j] = "O"
+	case '0':
+		if g.Field[i][j] == ' ' && !CheckDraw() && !CheckWin() {
+			g.Current = 'X'
+			g.Field[i][j] = '0'
+			fmt.Println(g.Field)
+			DrawField()
 			var signal []byte
 			signal = append(signal, byte('0'))
 			signal = append(signal, byte(i))
 			signal = append(signal, byte(j))
 			server.SendMove(signal)
-			DrawField()
 		}
 
 	}
 
 	if CheckWin() {
-		OfferNewGame(g.field[i][j])
+		OfferNewGame(g.Field[i][j])
 	}
 	if CheckDraw() {
-		OfferNewGame("nobody")
-	}
-
-	signal := make([]byte, 9)
-
-	conn, err := net.Dial("tcp", "192.168.1.164:4545")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer conn.Close()
-	conn.Read(signal[:])
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			g.field[i][j] = string(signal[i*3+j])
-		}
+		OfferNewGame(' ')
 	}
 
 	DrawField()
 }
 
-func OfferNewGame(winner string) {
+func OfferNewGame(winner byte) {
 
 	TextNewGame := container.NewCenter(
-		widget.NewLabel("winner is "+winner),
+		widget.NewLabel("winner is "+string(winner)),
 		widget.NewLabel("\n\n\nNew game"),
 	)
 
@@ -261,21 +243,21 @@ func OfferNewGame(winner string) {
 
 func CheckWin() bool {
 	for row := 0; row < 3; row++ {
-		if g.field[row][0] != "" && g.field[row][0] == g.field[row][1] && g.field[row][1] == g.field[row][2] {
+		if g.Field[row][0] != ' ' && g.Field[row][0] == g.Field[row][1] && g.Field[row][1] == g.Field[row][2] {
 			return true
 		}
 	}
 
 	for col := 0; col < 3; col++ {
-		if g.field[0][col] != "" && g.field[0][col] == g.field[1][col] && g.field[1][col] == g.field[2][col] {
+		if g.Field[0][col] != ' ' && g.Field[0][col] == g.Field[1][col] && g.Field[1][col] == g.Field[2][col] {
 			return true
 		}
 	}
 
-	if g.field[0][0] != "" && g.field[0][0] == g.field[1][1] && g.field[1][1] == g.field[2][2] {
+	if g.Field[0][0] != ' ' && g.Field[0][0] == g.Field[1][1] && g.Field[1][1] == g.Field[2][2] {
 		return true
 	}
-	if g.field[0][2] != "" && g.field[0][2] == g.field[1][1] && g.field[1][1] == g.field[2][0] {
+	if g.Field[0][2] != ' ' && g.Field[0][2] == g.Field[1][1] && g.Field[1][1] == g.Field[2][0] {
 		return true
 	}
 
@@ -285,7 +267,7 @@ func CheckWin() bool {
 func CheckDraw() bool {
 	for row := 0; row < 3; row++ {
 		for col := 0; col < 3; col++ {
-			if g.field[row][col] == "" || CheckWin() {
+			if g.Field[row][col] == ' ' || CheckWin() {
 				return false
 			}
 		}
@@ -320,12 +302,14 @@ func ShowMenu() {
 		Menu.Add(content)
 	}
 
-	NewGameButton := widget.NewButton("New Game", func() {
-		Player.Char = []byte("0")
+	CreateButton := widget.NewButton("Create Game", func() {
+		server.StartServer(g.Field)
+		time.Sleep(10 * time.Millisecond)
+		Player.Char = 'X'
 		StartGame()
 	})
-	NewGameButton.Resize(fyne.NewSize(400, 200))
-	NewGameButton.Move(fyne.NewPos(100, 100))
+	CreateButton.Resize(fyne.NewSize(400, 200))
+	CreateButton.Move(fyne.NewPos(100, 100))
 
 	ExitButton := widget.NewButton("Exit", func() { App.Quit() })
 	ExitButton.Resize(fyne.NewSize(200, 50))
@@ -335,13 +319,16 @@ func ShowMenu() {
 	LogInButton.Resize(fyne.NewSize(100, 100))
 	LogInButton.Move(fyne.NewPos(0, 0))
 
-	StartServerButton := widget.NewButton("Create game", func() {
-		Player.Char = []byte("X")
-		server.StartServer()
+	FindButton := widget.NewButton("Find game", func() {
+		Player.Char = '0'
 		StartGame()
+		time.Sleep(100 * time.Millisecond)
+		server.StartClient(g.Field)
+		g.Field, g.Current = server.WaitMove(g.Field)
+		DrawField()
 	})
-	StartServerButton.Resize(fyne.NewSize(200, 50))
-	StartServerButton.Move(fyne.NewPos(200, 300))
+	FindButton.Resize(fyne.NewSize(200, 50))
+	FindButton.Move(fyne.NewPos(200, 300))
 
 	var labelUsername = widget.NewLabel(Player.Username)
 	if Player.Username == "" {
@@ -364,8 +351,8 @@ func ShowMenu() {
 	User.Move(fyne.NewPos(400, 0))
 
 	Menu.Add(User)
-	Menu.Add(NewGameButton)
-	Menu.Add(StartServerButton)
+	Menu.Add(CreateButton)
+	Menu.Add(FindButton)
 	Menu.Add(ExitButton)
 	Menu.Add(LogInButton)
 

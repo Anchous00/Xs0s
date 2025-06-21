@@ -14,12 +14,14 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 	"log"
+	"time"
 )
 
 var Field = *container.NewWithoutLayout()
 var Menu = *container.NewWithoutLayout()
 var Logger = *container.NewWithoutLayout()
-var Finding = *container.NewWithoutLayout()
+var FindingServer = *container.NewWithoutLayout()
+var FindingClient = *container.NewWithoutLayout()
 var App = app.New()
 var window = App.NewWindow("")
 
@@ -318,7 +320,8 @@ func ShowMenu() {
 	CreateButton := widget.NewButton("Create Game", func() {
 		server.StartServer()
 		Player.Char = 'X'
-		StartGame()
+		FindingWindow()
+
 	})
 	CreateButton.Resize(fyne.NewSize(400, 200))
 	CreateButton.Move(fyne.NewPos(100, 100))
@@ -386,14 +389,19 @@ func FindGameWindow() {
 			DrawField()
 		}()
 	})
+	ExitButton := widget.NewButton("Exit", func() { ShowMenu() })
+	ExitButton.Resize(fyne.NewSize(200, 50))
+	ExitButton.Move(fyne.NewPos(200, 300))
+
 	entry.Resize(fyne.NewSize(350, 40))
 	entry.Move(fyne.NewPos(100, 200))
 	EnterButton.Resize(fyne.NewSize(200, 50))
 	EnterButton.Move(fyne.NewPos(200, 250))
 
-	Finding.Add(entry)
-	Finding.Add(EnterButton)
-	window.SetContent(&Finding)
+	FindingServer.Add(ExitButton)
+	FindingServer.Add(entry)
+	FindingServer.Add(EnterButton)
+	window.SetContent(&FindingServer)
 
 }
 
@@ -434,5 +442,32 @@ func LogIn() {
 	Logger.Add(ExitButton)
 	Logger.Add(input)
 	window.SetContent(&Logger)
+}
 
+func FindingWindow() {
+	var find bool
+	find = true
+	ExitButton := widget.NewButton("Exit", func() {
+		find = false
+		server.IsServerRunning = false
+		ShowMenu()
+	})
+	ExitButton.Resize(fyne.NewSize(608, 608))
+	ExitButton.Move(fyne.NewPos(0, 0))
+
+	FindingClient.Add(ExitButton)
+	window.SetContent(&FindingClient)
+	window.SetTitle("Searching opponent")
+	go func() {
+		for {
+			time.Sleep(time.Millisecond * 16)
+			if server.IsConnected {
+				StartGame()
+				return
+			}
+			if !find {
+				return
+			}
+		}
+	}()
 }

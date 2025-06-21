@@ -10,30 +10,12 @@ type Game struct {
 	Field   [3][3]byte
 }
 
+var IsConnected bool
+var IsServerRunning bool
 var Conn net.Conn
 
 func StartServer() {
-
-	interfaces, err := net.Interfaces()
-	if err != nil {
-		fmt.Println("Ошибка при получении интерфейсов:", err)
-		return
-	}
-	for _, i := range interfaces {
-		addrs, err := i.Addrs()
-		if err != nil {
-			fmt.Printf("Ошибка при получении адресов для %s: %s\n", i.Name, err)
-			continue
-		}
-		for _, addr := range addrs {
-			switch v := addr.(type) {
-			case *net.IPNet:
-				fmt.Printf("Интерфейс: %s, IP: %s\n", i.Name, v.IP.String())
-			case *net.IPAddr:
-				fmt.Printf("Интерфейс: %s, IP: %s\n", i.Name, v.IP.String())
-			}
-		}
-	}
+	IsServerRunning = true
 
 	go func() {
 		listener, err := net.Listen("tcp", ":4545")
@@ -42,21 +24,31 @@ func StartServer() {
 			fmt.Println(err)
 			return
 		}
+		go func() {
+			for {
+				if !IsServerRunning {
+					listener.Close()
+					return
+				}
+			}
+		}()
 
 		fmt.Println("Server is listening...")
-
+		IsConnected = false
 		Conn, err = listener.Accept()
+		IsConnected = true
+		if !IsServerRunning {
+			IsConnected = false
+		}
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println("New connection from ", Conn.RemoteAddr())
 
 	}()
 }
 
 func SendMove(code []byte) {
-	fmt.Println("sent code", code)
 	Conn.Write(code)
 
 }

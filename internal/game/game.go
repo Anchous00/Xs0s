@@ -218,28 +218,34 @@ func MakeMove(x, y float32) {
 }
 
 func OfferNewGame(winner byte) {
-	GClr := uint8(1)
-	RClr := uint8(1)
-	BClr := uint8(0)
-	if winner == Player.Char {
+	GClr:=uint8(1)
+	RClr:=uint8(1)
+	BClr:=uint8(0)
+	Str := "Draw"
+	if winner == 'X'{
+		Str = "Winner is X"
+	} else if winner == '0'{
+		Str = "Winner is 0"
+	}
+	if winner == Player.Char{
 		GClr = 1
 		RClr = 0
-	} else if winner != Player.Char && winner != ' ' {
+	} else if winner != Player.Char && winner != ' '{
 		GClr = 0
 		RClr = 1
-	} else {
+	}else{
 		BClr = 1
 	}
-	Text := container.NewVBox(
-		widget.NewLabel("winner is "+string(winner)),
-		widget.NewLabel("Main menu"),
-	)
-	text := container.NewCenter(Text)
+	Text := container.NewCenter(widget.NewLabel("Main menu"))
+	str := container.NewCenter(widget.NewLabel(Str))
+	text1 := container.NewVBox(str, Text)
+	
+	text := container.NewCenter(text1)
 
 	btnExit := container.New(
 		layout.NewStackLayout(),
 		widget.NewButton("", func() { ShowMenu() }),
-		canvas.NewRectangle(color.RGBA{R: 127 * RClr, G: 127 * GClr, B: 127 * BClr, A: 255}),
+		canvas.NewRectangle(color.RGBA{R: 127*RClr, G: 127*GClr, B: 127*BClr, A: 255}),
 		text,
 	)
 
@@ -252,7 +258,6 @@ func OfferNewGame(winner byte) {
 	Field.Add(buttons)
 	MakeGrid()
 }
-
 func CheckWin() bool {
 	for row := 0; row < 3; row++ {
 		if g.Field[row][0] != ' ' && g.Field[row][0] == g.Field[row][1] && g.Field[row][1] == g.Field[row][2] {

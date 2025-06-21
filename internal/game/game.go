@@ -19,6 +19,7 @@ import (
 var Field = *container.NewWithoutLayout()
 var Menu = *container.NewWithoutLayout()
 var Logger = *container.NewWithoutLayout()
+var Finding = *container.NewWithoutLayout()
 var App = app.New()
 var window = App.NewWindow("Конченная игра")
 
@@ -197,15 +198,14 @@ func MakeMove(x, y float32) {
 		OfferNewGame(' ')
 		return
 	}
-	
 
-	go func(){
+	go func() {
 
 		g.Field, g.Current = server.WaitMove(g.Field)
 		DrawField()
 
 		if CheckWin() {
-			if Player.Char == '0'{
+			if Player.Char == '0' {
 				OfferNewGame('X')
 			} else {
 				OfferNewGame('0')
@@ -217,19 +217,17 @@ func MakeMove(x, y float32) {
 	}()
 }
 
-}
-
 func OfferNewGame(winner byte) {
-	GClr:=uint8(1)
-	RClr:=uint8(1)
-	BClr:=uint8(0)
-	if winner == Player.Char{
+	GClr := uint8(1)
+	RClr := uint8(1)
+	BClr := uint8(0)
+	if winner == Player.Char {
 		GClr = 1
 		RClr = 0
-	} else if winner != Player.Char && winner != ' '{
+	} else if winner != Player.Char && winner != ' ' {
 		GClr = 0
 		RClr = 1
-	}else{
+	} else {
 		BClr = 1
 	}
 	Text := container.NewVBox(
@@ -241,7 +239,7 @@ func OfferNewGame(winner byte) {
 	btnExit := container.New(
 		layout.NewStackLayout(),
 		widget.NewButton("", func() { ShowMenu() }),
-		canvas.NewRectangle(color.RGBA{R: 127*RClr, G: 127*GClr, B: 127*BClr, A: 255}),
+		canvas.NewRectangle(color.RGBA{R: 127 * RClr, G: 127 * GClr, B: 127 * BClr, A: 255}),
 		text,
 	)
 
@@ -310,14 +308,14 @@ func ShowMenu() {
 
 	OLEG := canvas.NewImageFromFile("internal/user/OLEG.jpg")
 	content := container.NewStack(OLEG)
-	content.Resize(fyne.NewSize(600, 600))
+	content.Resize(fyne.NewSize(608, 608))
 	content.Move(fyne.NewPos(0, 0))
 	if Player.Username == "Oleg" {
 		Menu.Add(content)
 	}
 
 	CreateButton := widget.NewButton("Create Game", func() {
-		server.StartServer(g.Field)
+		server.StartServer()
 		Player.Char = 'X'
 		StartGame()
 	})
@@ -333,13 +331,8 @@ func ShowMenu() {
 	LogInButton.Move(fyne.NewPos(0, 0))
 
 	FindButton := widget.NewButton("Find game", func() {
-		Player.Char = '0'
-		StartGame()
-		server.StartClient(g.Field)
-		go func() {
-			g.Field, g.Current = server.WaitMove(g.Field)
-			DrawField()
-		}()
+		FindGameWindow()
+
 	})
 	FindButton.Resize(fyne.NewSize(200, 50))
 	FindButton.Move(fyne.NewPos(200, 300))
@@ -371,6 +364,33 @@ func ShowMenu() {
 	Menu.Add(LogInButton)
 
 	window.SetContent(&Menu)
+}
+
+func FindGameWindow() {
+	var ip string
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Enter enemy IP")
+	EnterButton := widget.NewButton("Enter", func() {
+		ip = entry.Text
+		Player.Char = '0'
+		StartGame()
+		DrawField()
+		server.StartClient(ip)
+
+		go func() {
+			g.Field, g.Current = server.WaitMove(g.Field)
+			DrawField()
+		}()
+	})
+	entry.Resize(fyne.NewSize(350, 40))
+	entry.Move(fyne.NewPos(100, 200))
+	EnterButton.Resize(fyne.NewSize(200, 50))
+	EnterButton.Move(fyne.NewPos(200, 250))
+
+	Finding.Add(entry)
+	Finding.Add(EnterButton)
+	window.SetContent(&Finding)
+
 }
 
 func RunApp() {

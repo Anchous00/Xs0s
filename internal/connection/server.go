@@ -13,7 +13,7 @@ type Game struct {
 var ip net.Addr
 var Conn net.Conn
 
-func StartServer(Field [3][3]byte) {
+func StartServer() {
 
 	go func() {
 		listener, err := net.Listen("tcp", ":4545")
@@ -51,9 +51,11 @@ func HandleCode(code []byte, Field [3][3]byte) [3][3]byte {
 	return Field
 }
 
-func StartClient(Field [3][3]byte) {
+func StartClient(ip string) {
 	var err error
-	Conn, err = net.Dial("tcp", "127.0.0.1:4545")
+	fmt.Println("voshlo")
+	Conn, err = net.Dial("tcp", ip+":4545")
+	fmt.Println(Conn.RemoteAddr())
 	if err != nil {
 		fmt.Println(err)
 		return

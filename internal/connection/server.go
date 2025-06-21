@@ -10,10 +10,30 @@ type Game struct {
 	Field   [3][3]byte
 }
 
-var ip net.Addr
 var Conn net.Conn
 
 func StartServer() {
+
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		fmt.Println("Ошибка при получении интерфейсов:", err)
+		return
+	}
+	for _, i := range interfaces {
+		addrs, err := i.Addrs()
+		if err != nil {
+			fmt.Printf("Ошибка при получении адресов для %s: %s\n", i.Name, err)
+			continue
+		}
+		for _, addr := range addrs {
+			switch v := addr.(type) {
+			case *net.IPNet:
+				fmt.Printf("Интерфейс: %s, IP: %s\n", i.Name, v.IP.String())
+			case *net.IPAddr:
+				fmt.Printf("Интерфейс: %s, IP: %s\n", i.Name, v.IP.String())
+			}
+		}
+	}
 
 	go func() {
 		listener, err := net.Listen("tcp", ":4545")
@@ -31,7 +51,6 @@ func StartServer() {
 			return
 		}
 		fmt.Println("New connection from ", Conn.RemoteAddr())
-		ip = Conn.RemoteAddr()
 
 	}()
 }
@@ -51,16 +70,14 @@ func HandleCode(code []byte, Field [3][3]byte) [3][3]byte {
 	return Field
 }
 
-func StartClient(ip string) {
+func StartClient(ip string) bool {
 	var err error
-	fmt.Println("voshlo")
 	Conn, err = net.Dial("tcp", ip+":4545")
-	fmt.Println(Conn.RemoteAddr())
 	if err != nil {
 		fmt.Println(err)
-		return
+		return false
 	}
-
+	return true
 }
 
 func WaitMove(Field [3][3]byte) ([3][3]byte, byte) {

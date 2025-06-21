@@ -21,7 +21,7 @@ var Menu = *container.NewWithoutLayout()
 var Logger = *container.NewWithoutLayout()
 var Finding = *container.NewWithoutLayout()
 var App = app.New()
-var window = App.NewWindow("Конченная игра")
+var window = App.NewWindow("")
 
 var Player user.User
 
@@ -288,6 +288,7 @@ func CheckDraw() bool {
 }
 
 func StartNewGame() {
+	window.SetTitle("you play " + string(Player.Char))
 	AddButttons()
 	MakeGrid()
 	g = NewGame()
@@ -373,10 +374,13 @@ func FindGameWindow() {
 	EnterButton := widget.NewButton("Enter", func() {
 		ip = entry.Text
 		Player.Char = '0'
+
+		if !server.StartClient(ip) {
+			window.SetTitle("server not found")
+			return
+		}
 		StartGame()
 		DrawField()
-		server.StartClient(ip)
-
 		go func() {
 			g.Field, g.Current = server.WaitMove(g.Field)
 			DrawField()

@@ -127,6 +127,10 @@ func DrawX(x, y float32) {
 }
 
 func DrawField() {
+	Field.RemoveAll()
+	AddButttons()
+	MakeGrid()
+
 	for i := float32(0); i < 3; i++ {
 		for j := float32(0); j < 3; j++ {
 			if g.Field[int(i)][int(j)] == 'X' {

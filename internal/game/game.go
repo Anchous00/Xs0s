@@ -240,7 +240,10 @@ func OfferNewGame(winner byte) {
 
 	btnExit := container.New(
 		layout.NewStackLayout(),
-		widget.NewButton("", func() { ShowMenu() }),
+		widget.NewButton("", func() {
+			ShowMenu()
+			server.IsServerRunning = false
+		}),
 		canvas.NewRectangle(color.RGBA{R: 127 * RClr, G: 127 * GClr, B: 127 * BClr, A: 255}),
 		text,
 	)

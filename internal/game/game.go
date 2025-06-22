@@ -243,6 +243,7 @@ func OfferNewGame(winner byte) {
 		widget.NewButton("", func() {
 			ShowMenu()
 			server.IsServerRunning = false
+			server.Conn.Close()
 		}),
 		canvas.NewRectangle(color.RGBA{R: 127 * RClr, G: 127 * GClr, B: 127 * BClr, A: 255}),
 		text,

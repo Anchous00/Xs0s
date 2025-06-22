@@ -237,7 +237,7 @@ func OfferNewGame(winner byte) {
 	} else {
 		BClr = 1
 	}
-	wintext := "winner is" + string(winner)
+	wintext := "winner is " + string(winner)
 	if winner == ' ' {
 		wintext = "Draw"
 	}

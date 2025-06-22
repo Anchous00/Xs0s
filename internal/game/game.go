@@ -223,6 +223,7 @@ func OfferNewGame(winner byte) {
 	GClr := uint8(1)
 	RClr := uint8(1)
 	BClr := uint8(0)
+	server.IsServerRunning = false
 	if winner == Player.Char {
 		GClr = 1
 		RClr = 0
@@ -242,7 +243,7 @@ func OfferNewGame(winner byte) {
 		layout.NewStackLayout(),
 		widget.NewButton("", func() {
 			ShowMenu()
-			server.IsServerRunning = false
+
 			server.Conn.Close()
 		}),
 		canvas.NewRectangle(color.RGBA{R: 127 * RClr, G: 127 * GClr, B: 127 * BClr, A: 255}),

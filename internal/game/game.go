@@ -237,8 +237,12 @@ func OfferNewGame(winner byte) {
 	} else {
 		BClr = 1
 	}
+	wintext := "winner is" + string(winner)
+	if winner == ' ' {
+		wintext = "Draw"
+	}
 	Text := container.NewVBox(
-		widget.NewLabel("winner is "+string(winner)),
+		widget.NewLabel(wintext),
 		widget.NewLabel("Main menu"),
 	)
 	text := container.NewCenter(Text)
